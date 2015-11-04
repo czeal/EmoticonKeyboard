@@ -1,16 +1,30 @@
 apply plugin: 'com.android.library'
-apply plugin: "com.jfrog.bintray"
+apply plugin: 'com.jfrog.bintray'
 apply plugin: "com.github.dcendents.android-maven"
+
+version = "0.1.0"
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+allprojects {
+    repositories {
+        maven {
+            url properties.getProperty("sdk.dir")+"/extras/android/m2repository"
+        }
+        mavenLocal()
+        jcenter()
+    }
+}
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 23
         versionCode 1
-        versionName "0.1"
+        versionName version
     }
     buildTypes {
         release {
@@ -18,33 +32,50 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.11'
+    compile 'com.android.support:support-v4:23.1.0'
     compile 'com.android.support:appcompat-v7:23.1.0'
 }
 
-group = 'com.zeal.android.emoticonsheet'
-version = '0.1'
+def siteUrl = 'https://github.com/czeal/EmoticonKeyboard'
+def gitUrl = 'https://github.com/czeal/EmoticonKeyboard.git'
 
-def siteUrl = 'https://github.com/czeal/EmoticonSheet'
-def gitUrl = 'https://github.com/czeal/EmoticonSheet.git'
+group = 'com.zeal.android'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
+    }
+}
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    classifier 'sources'
 }
 
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
+    classpath += configurations.compile
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    options.encoding = "utf-8"
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
     from javadoc.destinationDir
+    classifier 'javadoc'
 }
 
 artifacts {
@@ -52,50 +83,49 @@ artifacts {
     archives sourcesJar
 }
 
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            project {
-                packaging 'aar'
-                name 'Emoticon Sheet'
-                url siteUrl
-                // Set your license
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id 'zeal'                                           // #CONFIG# // your user id (you can write your nickname)
-                        name 'czeal'                                       // #CONFIG# // your user name
-                        email '2560034435@qq.com'                               // #CONFIG# // your email
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-                }
+android.libraryVariants.all { variant ->
+    println variant.javaCompile.classpath.files
+    if(variant.name == 'release') { //我们只需 release 的 javadoc
+        task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+            // title = ''
+            // description = ''
+            source = variant.javaCompile.source
+            classpath = files(variant.javaCompile.classpath.files, project.android.getBootClasspath())
+            options {
+                encoding "utf-8"
+                //links "http://docs.oracle.com/javase/7/docs/api/"
+                linksOffline "http://d.android.com/reference", "${android.sdkDirectory}/docs/reference"
             }
+            exclude '**/BuildConfig.java'
+            exclude '**/R.java'
+        }
+        task("javadoc${variant.name.capitalize()}Jar", type: Jar, dependsOn: "generate${variant.name.capitalize()}Javadoc") {
+            classifier = 'javadoc'
+            from tasks.getByName("generate${variant.name.capitalize()}Javadoc").destinationDir
+        }
+        artifacts {
+            archives tasks.getByName("javadoc${variant.name.capitalize()}Jar")
         }
     }
 }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
 bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-    configurations = ['archives']
+    user = hasProperty("bintrayUser")?getProperty("bintrayUser"):getProperty("BINTRAY_USER")
+    key = hasProperty("bintrayKey")?getProperty("bintrayKey"):getProperty("BINTRAY_KEY")
     pkg {
-        repo = "maven"
-        name = "emoticon-sheet"
-        websiteUrl = siteUrl
+        repo = 'maven'
+        name = 'emoticon-sheet'
+
+        version {
+            name = '0.1.0'
+            desc = 'a emoticon keyboard for android'
+            vcsTag = '0.1.0'
+        }
+
+        licenses = ['Apache-2.0']
         vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
+        websiteUrl = siteUrl
+        publish=true
     }
+    configurations = ['archives']
 }
