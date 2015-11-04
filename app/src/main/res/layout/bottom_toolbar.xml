@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/action_take_photo"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scaleType="centerInside"
+        android:src="@drawable/camera" />
+
+    <ImageView
+        android:id="@+id/action_pick_images"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scaleType="centerInside"
+        android:src="@drawable/picture" />
+
+    <ImageView
+        android:id="@+id/action_call_somebody"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scaleType="centerInside"
+        android:src="@drawable/call" />
+
+    <ImageView
+        android:id="@+id/action_pick_sharp_topic"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scaleType="centerInside"
+        android:src="@drawable/sharp" />
+
+    <ImageView
+        android:id="@+id/action_pick_emojis"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scaleType="centerInside"
+        android:src="@drawable/emo_tongue" />
+
+</LinearLayout>
