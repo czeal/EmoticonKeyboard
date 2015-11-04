@@ -29,8 +29,8 @@ dependencies {
 group = 'com.zeal.android.emoticonsheet'
 version = '0.1'
 
-def siteUrl = 'https://github.com/czeal/EmoticonSheet'
-def gitUrl = 'https://github.com/czeal/EmoticonSheet.git'
+def siteUrl = 'https://github.com/czeal/EmoticonKeyboard'
+def gitUrl = 'https://github.com/czeal/EmoticonKeyboard.git'
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -69,9 +69,9 @@ install {
                 }
                 developers {
                     developer {
-                        id 'zeal'                                           // #CONFIG# // your user id (you can write your nickname)
-                        name 'czeal'                                       // #CONFIG# // your user name
-                        email '2560034435@qq.com'                               // #CONFIG# // your email
+                        id 'zeal'
+                        name 'czeal'
+                        email '2560034435@qq.com'
                     }
                 }
                 scm {
